@@ -62,7 +62,7 @@ public class HelloWorld6Test {
         assertEquals(
                 userIdOnAuth,
                 userIdOnCheck,
-                "user is from auth request is not equal to user_id from check request"
+                "user id from auth request is not equal to user_id from check request"
         );
     }
 
@@ -81,7 +81,7 @@ public class HelloWorld6Test {
                 }
         //Получить ответ и взять из него json
         JsonPath responseForCheck = spec.get().jsonPath();
-        assertEquals(responseForCheck.getInt("user_id"),"user_id should be 0 for request");
+        assertEquals(responseForCheck.getInt("user_id"),"user_id should be 0 for unauth request");
     }
 }
 
