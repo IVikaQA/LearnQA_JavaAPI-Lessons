@@ -29,7 +29,7 @@ public class HelloWorld6Test {
         Map<String,String> authData = new HashMap<>();
         authData.put("email","vinkotov@example.com");
         authData.put("password","1234");
-        
+
         Response responseGetAuth = RestAssured
                 .given()
                 .body(authData)
@@ -68,10 +68,11 @@ public class HelloWorld6Test {
         if (condition.equals("cookie")) {
             spec.cookie("auth_sid", this.cookie);
         } else if (condition.equals("headers")){
-                spec.cookie("x-csrf-token",this.header);
+                spec.header("x-csrf-token",this.header);
         } else {
                 throw new IllegalArgumentException("Condition value is known: " + condition);
                 }
+        //Получить ответ и взять из него json
         JsonPath responseForCheck = spec.get().jsonPath();
         assertEquals(responseForCheck.getInt("user_id"),"user_id should be 0 for request");
     }
