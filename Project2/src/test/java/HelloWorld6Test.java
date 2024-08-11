@@ -13,6 +13,8 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+//НЕ РАБОТАЕТ ВЕРНО, НО суть ясна
+
 //Рассматриваем теги: BeforeEach
 //Эти теги вызываются до и после каждого теста в классе
 //BeforeEach - В этой функции функции прописывается вся логика,
@@ -81,7 +83,7 @@ public class HelloWorld6Test {
                 }
         //Получить ответ и взять из него json
         JsonPath responseForCheck = spec.get().jsonPath();
-        assertEquals(responseForCheck.getInt("user_id"),"user_id should be 0 for unauth request");
+        assertEquals(0,responseForCheck.getInt("user_id"),"user_id should be 0 for unauth request");
     }
 }
 
