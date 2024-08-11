@@ -19,11 +19,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 //с которой должен начинаться каждый тест в классе. Например,
 //подготовка тестовых данных
 public class HelloWorld6Test {
-
+    //1)Список параметров, которые мы будем использовать в тестах
     String cookie;
     String header;
     int userIdOnAuth;
 
+    //2)Делаем первый запрос и кладем в переменные те значения, которые мы будем использовать
+    //в тестах
     @BeforeEach
     public void loginUser(){
         Map<String,String> authData = new HashMap<>();
@@ -35,11 +37,16 @@ public class HelloWorld6Test {
                 .body(authData)
                 .post("https://playground.learnqa.ru/api/user/login")
                 .andReturn();
+        //this - Спец.указатель,который позволяет переменную сделать полем класс
+        //и передавать ее значения из одной функции в другие
+        //Указывать this нужно если у нас внутри функции две переменных с одинаковым именем
         this.cookie = responseGetAuth.getCookie("auth_sid");
         this.header = responseGetAuth.getHeader("x-csrf-token");
         this.userIdOnAuth = responseGetAuth.jsonPath().getInt("user_id");
     }
 
+    //3)В тесте уже делаем второй запрос и в зависимости от проверки используем
+    //ту или иную переменную класса
     @Test
     public void testAuthUser(){
         JsonPath responseCheckAuth = RestAssured
