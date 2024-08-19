@@ -69,7 +69,7 @@ public class HelloWorld6Test {
     }
 
     @ParameterizedTest
-    @ValueSource(strings ={"cookie","header"})
+    @ValueSource(strings ={"cookie","headers"})
     public void testNegativeAuthUser(String condition){
         RequestSpecification spec = RestAssured.given();
         spec.baseUri("https://playground.learnqa.ru/api/user/auth");

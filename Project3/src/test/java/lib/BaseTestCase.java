@@ -8,6 +8,7 @@ import io.restassured.response.Response;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.hasKey;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 //Данный класс будет делать вещи,которые в дальнейшем мы будем использовать в тестах,начиная с HelloWorld7Test
@@ -38,5 +39,14 @@ public class BaseTestCase {
         assertTrue(cookies.containsKey(name),"Response doesn't cookie with name " + name);
         //Если пришел,то возвращаем значение; Если нет, то метод падает с ошибкой
         return cookies.get(name);
+    }
+
+    //3) На вход принимаем ответ запроса (Response)
+    //и название поля json, котрое хотим получить
+    protected int getIntFromJson(Response Response,String name){
+        //Ищем ключь с именем name, благодаря знаку $ в корне ответа
+        Response.then().assertThat().body("$",hasKey(name));
+        //Возвращаем значение поля,название которого мы получили -  name
+        return Response.jsonPath().getInt(name);
     }
 }
