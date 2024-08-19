@@ -47,14 +47,19 @@ public class UserRegisterTest extends BaseTestCase {
         Assertions.assertResponseTextEquals(responseCreateAuth,"Users with email '" + email + "' already exists");
     }
 
+    /*
+    Тест-2:Проверять метод "Create user"
+    Но здесь в отличии от первого варианта,почта генерится каждый раз новая и поэтому
+    пользователь создается
+     */
     @Test
     public void testCreateUserSuccesfully(){
         //Генерим почту
         String email = DataGenerator.getRandomEmail();
 
         /*
-        Тест-2:Проверить метод "Create user"
-        Создаем нового пользователя. Ну почта уж точно уникальна
+        Создаем нового пользователя, почта уникальна.
+        Так как генерится с помощью метода getRandomEmail() класса DataGenerator
          */
         Map<String,String> userData = new HashMap<>();
         userData.put("email",email);
@@ -62,6 +67,50 @@ public class UserRegisterTest extends BaseTestCase {
         userData.put("username","learnqa");
         userData.put("firstName","learnqa");
         userData.put("lastName","learnqa");
+
+        Response responseCreateAuth = RestAssured
+                .given()
+                .body(userData)
+                .post("https://playground.learnqa.ru/api/user")
+                .andReturn();
+
+        //Смотрим,что код ответа сервера - 200
+        Assertions.assertResponseCodeEquals(responseCreateAuth,200);
+        //Смотрим ответ сервера
+        //System.out.println(responseCreateAuth.asString());
+        /*
+        Смотрим ответ сервера: Проверяем наличие аргумента
+         */
+        Assertions.assertJsonHasKey(responseCreateAuth,"id");
+    }
+
+    /*
+    Тест-3:Проверить метод "Create user" для существующего пользователя
+    Только здесь данные берутся из метода getRandomEmail(),getRegistrationData()
+     */
+    @Test
+    public void testCreateUserWithExistingEmail2(){
+        //String email = "vinkotov@example.com";
+        //Генерим почту
+        String email = DataGenerator.getRandomEmail();
+
+        Map<String,String> userData = new HashMap<>();
+        userData.put("email",email);
+        //Все остальные данные для user берутся из метода getRegistrationData()
+        userData = DataGenerator.getRegistrationData(userData);
+    }
+
+    /*
+    Тест-4:Проверять метод "Create user" для нового пользователя
+    Но здесь в отличии от первого варианта,почта генерится каждый раз новая и поэтому
+    пользователь создается
+     */
+    @Test
+    public void testCreateUserSuccesfully2(){
+        //Генерим почту
+        String email = DataGenerator.getRandomEmail();
+
+        Map<String,String> userData = DataGenerator.getRegistrationData();
 
         Response responseCreateAuth = RestAssured
                 .given()
