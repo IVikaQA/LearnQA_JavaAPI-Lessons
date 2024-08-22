@@ -28,7 +28,7 @@ public class UserEditTest extends BaseTestCase {
                 .jsonPath();
 
         //Извлечение ID пользователя
-        String userId = responseCreateAuth.getString("id");
+       String userId = responseCreateAuth.getString("id");
 
         //LOGIN
         Map<String,String> authData = new HashMap<>();

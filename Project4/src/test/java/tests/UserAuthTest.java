@@ -14,18 +14,32 @@ import java.util.Map;
 
 import lib.Assertions;
 
-//В тестах нам не нужно получать значение cookie и header
-//Здесь в тестах нам нужно просто убедиться что есть header и cookie
-//и равняется ожидаемому
-//Для этого создадим отдельный класс Assertions, в котором, например,
-//будет метод,который принимает на вход ответ от сервера,
-//получал бы ожидаемое значение,сам бы парсил ответ для получения
-//реального значения и сравнивал. Смотри класс
+import io.qameta.allure.Description;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import org.junit.jupiter.api.DisplayName;
+
+import lib.ApiCoreRequests;
+
+/*
+В тестах нам не нужно получать значение cookie и header
+Здесь в тестах нам нужно просто убедиться что есть header и cookie
+и равняется ожидаемому
+Для этого создадим отдельный класс Assertions, в котором, например,
+будет метод,который принимает на вход ответ от сервера,
+получал бы ожидаемое значение,сам бы парсил ответ для получения
+реального значения и сравнивал. Смотри класс
+ */
+
+//Тег @Epic говорит, что далее следующие тесты принадлежат большой единой части
+@Epic("Authorization cases")
+@Feature("Authorisation")
 public class UserAuthTest extends BaseTestCase {
 
     String cookie;
     String header;
     int userIdOnAuth;
+    private final ApiCoreRequests apiCoreRequests = new ApiCoreRequests();
 
     /*
     Выносим в этот метод данные,которые нужно для прохождения тестов
@@ -37,63 +51,102 @@ public class UserAuthTest extends BaseTestCase {
      */
     @BeforeEach
     public void loginUser(){
-        // 1)
+        // 1) Создание карты для хранения данных авторизации пользователя (email и пароль).
         Map<String,String> authData = new HashMap<>();
         authData.put("email","vinkotov@example.com");
         authData.put("password","1234");
 
-        // 2)
-        Response responseGetAuth = RestAssured
-                .given()
-                .body(authData)
-                .post("https://playground.learnqa.ru/api/user/login")
-                .andReturn();
+        /*
+        2) Выполнение POST-запроса на авторизацию пользователя с использованием данных из authData.
+        Ответ сохраняется в переменной responseGetAuth.
+         */
+        Response responseGetAuth = apiCoreRequests
+                .makePostRequest("https://playground.learnqa.ru/api/user/login",authData);
 
-        // 3)
+        /*
+        Извлечение значений cookie, заголовка и идентификатора пользователя
+        из ответа responseGetAuth и сохранение их в соответствующие переменные.
+         */
         this.cookie = this.getCookie(responseGetAuth,"auth_sid");
         this.header = this.getHeader(responseGetAuth,"x-csrf-token");
         this.userIdOnAuth = this.getIntFromJson(responseGetAuth,"user_id");
     }
 
+    /*
+    Аннотации @Test, @Description и @DisplayName описывают тест,
+    который проверяет успешную авторизацию пользователя.
+     */
     @Test
+    @Description("TThis test successfully authorize user by email and password")
+    @DisplayName("Test positive auth user")
     public void testAuthUser(){
         /*
-        1)Замееняем JsonPath на Response,чтобы использовать методы класса Assertions
+        1)Выполнение GET-запроса для проверки статуса авторизации пользователя
+         с использованием ранее полученных cookie и заголовка.
+         Ответ сохраняется в переменной responseCheckAuth.
          */
-        Response responseCheckAuth = RestAssured
-                .given()
-                //Передаем в нужнуе части запроса значения,которые хранятся в переменных
-                //которые определены до меетода с тегом BeforeEach
-                .header("x-csrf-token",this.header)
-                .cookie("auth_sid",this.cookie)
-                .get("https://playground.learnqa.ru/api/user/auth")
-                .andReturn();
+        Response responseCheckAuth = apiCoreRequests
+                .makeGetRequest("https://playground.learnqa.ru/api/user/auth"
+                ,this.header
+                ,this.cookie);
         /*
         Используем статический метод класса Assertions
         Передав в метод asserJsonByName
         1.объект запроса - responseCheckAuth
-        2.Имя парметра, которое ищем
+        2.Имя параметра, которое ищем
         3.Ожидаемый результат
+        Использование метода класса Assertions для проверки, что идентификатор пользователя
+         в ответе совпадает с ожидаемым значением
          */
         Assertions.asserJsonByName(responseCheckAuth,"user_id",this.userIdOnAuth);
     }
 
+    /*
+    Аннотации описывают негативный тест, который проверяет статус авторизации
+     без отправки cookie или заголовка. @ParameterizedTest позволяет запускать
+     один и тот же тест с разными параметрами (в данном случае — "cookie" и "headers").
+     */
+    @Description("This test checks authorization status w/o sending auth cookie or token")
+    @DisplayName("Test negattive auth user")
     @ParameterizedTest
     @ValueSource(strings = {"cookie","headers"})
+    /*
+    Этот метод, который принимает строковый параметр condition.
+    Этот параметр определяет, как будет выполняться запрос для проверки аутентификации.
+     */
     public void testNegativeAuthUser(String condition){
-        RequestSpecification spec = RestAssured.given();
-        spec.baseUri("https://playground.learnqa.ru/api/user/auth");
-
+        /*
+        Если condition равно "cookie", то выполняется метод makeGetRequestWithCookie,
+        который делает GET-запрос к указанному URL с использованием cookie для аутентификации.
+        Если condition равно "header", выполняется метод makeGetRequestWithToken,
+        который делает аналогичный запрос, но с использованием заголовка для аутентификации.
+         */
         if (condition.equals("cookie")) {
-            spec.cookie("auth_sid", this.cookie);
-        } else if (condition.equals("headers")){
-            spec.header("x-csrf-token",this.header);
+            /*
+            Объявляется переменная responseForCheck, которая будет хранить
+            ответ от API после выполнения запроса.
+             */
+            Response responseForCheck = apiCoreRequests.makeGetRequestWithCookie(
+                    "https://playground.learnqa.ru/api/user/auth"
+            ,this.cookie
+            );
+            Assertions.asserJsonByName(responseForCheck,"user_id",0);
+        } else if (condition.equals("header")) {
+            Response responseForCheck = apiCoreRequests.makeGetRequestWithToken(
+                    "https://playground.learnqa.ru/api/user/auth"
+                    ,this.header
+            );
+            /*
+            Происходит проверка ответа с помощью метода Assertions.assertJsonByName. Этот метод проверяет, что значение поля "user_id" в JSON-ответе равно 0.
+             */
+            Assertions.asserJsonByName(responseForCheck,"user_id",0);
         } else {
-            throw new IllegalArgumentException("Condition value is known: " + condition);
+            /*
+            Если значение condition не соответствует ни одному из
+            ожидаемых ("cookie" или "header"), выбрасывается исключение IllegalArgumentException
+             с сообщением об ошибке.
+             */
+            throw new IllegalArgumentException("Condition value is not known: " + condition);
         }
-
-        //Получить ответ и взять из него json вместо JsonPath
-        Response responseForCheck = spec.get().andReturn();
-        Assertions.asserJsonByName(responseForCheck,"user_id",0);
     }
 }
