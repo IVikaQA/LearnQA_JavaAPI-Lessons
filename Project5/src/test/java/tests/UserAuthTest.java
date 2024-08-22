@@ -77,7 +77,7 @@ public class UserAuthTest extends BaseTestCase {
     который проверяет успешную авторизацию пользователя.
      */
     @Test
-    @Description("TThis test successfully authorize user by email and password")
+    @Description("This test successfully authorize user by email and password")
     @DisplayName("Test positive auth user")
     public void testAuthUser(){
         /*
@@ -109,7 +109,7 @@ public class UserAuthTest extends BaseTestCase {
     @Description("This test checks authorization status w/o sending auth cookie or token")
     @DisplayName("Test negattive auth user")
     @ParameterizedTest
-    @ValueSource(strings = {"cookie","headers"})
+    @ValueSource(strings = {"cookie","header"})
     /*
     Этот метод, который принимает строковый параметр condition.
     Этот параметр определяет, как будет выполняться запрос для проверки аутентификации.
