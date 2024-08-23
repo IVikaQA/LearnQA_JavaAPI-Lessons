@@ -13,12 +13,13 @@ import static io.restassured.RestAssured.given;
 Класс содержит методы для выполнения HTTP-запросов (GET и POST) с использованием библиотеки RestAssured
  */
 public class ApiCoreRequests {
+
     @Step("Make a GET-request with token and auth cookie")
-    public Response makeGetRequest(String url,String token,String cookie){
+    public Response makeGetRequest(String url,String token,String cookie) {
         return given()
                 .filter(new AllureRestAssured())
                 .header(new Header("x-csrf-token",token))
-                .cookie("auth-cookie",cookie)
+                .cookie("auth_sid",cookie)
                 .get(url)
                 .andReturn();
     }

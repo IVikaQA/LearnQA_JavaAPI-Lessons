@@ -3,6 +3,7 @@ package lib;
 import io.restassured.response.Response;
 import static org.hamcrest.Matchers.hasKey;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class Assertions {
 
@@ -25,7 +26,7 @@ public class Assertions {
         Response.then().assertThat().body("$",hasKey(name));
         //2)Получаем значение нужного параметра,передав его имя
         int value = Response.jsonPath().getInt(name);
-        //3) Сравнием ожидаемое значение со значением из ответа сервера,если не совпадает
+        //3) Сравниваем ожидаемое значение со значением из ответа сервера,если не совпадает
         //то выводим сообщение
         assertEquals(expectedValue,value,"JSON value is not equal to expected value");
     }
